@@ -1,0 +1,7 @@
+{
+  "name": "magiceden",
+  "version": "1.0.0",
+  "scripts": {
+    "run:me": "ts-node magiceden/index.ts"
+  }
+}
