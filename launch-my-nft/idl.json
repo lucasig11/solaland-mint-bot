@@ -1,0 +1,510 @@
+{
+  "version": "0.1.0",
+  "name": "nft_candy_machine",
+  "instructions": [
+    {
+      "name": "mintV6",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "payer", "isMut": true, "isSigner": true },
+        { "name": "wallet", "isMut": true, "isSigner": false },
+        { "name": "wallet2", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": true, "isSigner": true },
+        { "name": "associated", "isMut": true, "isSigner": false },
+        { "name": "masterEdition", "isMut": true, "isSigner": false },
+        { "name": "totalMints", "isMut": true, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "proof", "type": { "vec": { "array": ["u8", 32] } } },
+        { "name": "expect", "type": "u64" }
+      ]
+    },
+    {
+      "name": "mintV5",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "payer", "isMut": true, "isSigner": true },
+        { "name": "wallet", "isMut": true, "isSigner": false },
+        { "name": "wallet2", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": true, "isSigner": true },
+        { "name": "associated", "isMut": true, "isSigner": false },
+        { "name": "masterEdition", "isMut": true, "isSigner": false },
+        { "name": "totalMints", "isMut": true, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "proof", "type": { "vec": { "array": ["u8", 32] } } },
+        { "name": "expect", "type": "u64" }
+      ]
+    },
+    {
+      "name": "editCmV5",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "data", "type": { "defined": "CandyMachineDataV3" } }]
+    },
+    {
+      "name": "editCmV6",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "data", "type": { "defined": "CandyMachineDataV3" } }]
+    },
+    {
+      "name": "revealV5",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "revealV6",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "allowUnfreezeV5",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "allowRevealV5",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "newUri", "type": "string" }]
+    },
+    {
+      "name": "burnSupplyV5",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "percentToBurn", "type": "u8" }]
+    },
+    {
+      "name": "allowUnfreezeV6",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "allowRevealV6",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "newUri", "type": "string" }]
+    },
+    {
+      "name": "burnSupplyV6",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "percentToBurn", "type": "u8" }]
+    },
+    {
+      "name": "burnFrozen",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": false },
+        { "name": "associated", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "masterEdition", "isMut": true, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "migrate",
+      "accounts": [
+        { "name": "payer", "isMut": true, "isSigner": true },
+        { "name": "cm", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "thawV5",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "associated", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "masterEdition", "isMut": true, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "thawV6",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "associated", "isMut": true, "isSigner": false },
+        { "name": "metadata", "isMut": true, "isSigner": false },
+        { "name": "masterEdition", "isMut": true, "isSigner": false },
+        { "name": "tokenMetadataProgram", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "initCmV5",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "wallet", "isMut": false, "isSigner": false },
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "payer", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "rent", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "data", "type": { "defined": "CandyMachineDataV3" } },
+        { "name": "seed", "type": "publicKey" },
+        { "name": "thawDate", "type": { "option": "i64" } }
+      ]
+    },
+    {
+      "name": "initCmV6",
+      "accounts": [
+        { "name": "candyMachine", "isMut": true, "isSigner": false },
+        { "name": "wallet", "isMut": false, "isSigner": false },
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "payer", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "rent", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "data", "type": { "defined": "CandyMachineDataV3" } },
+        { "name": "seed", "type": "publicKey" },
+        { "name": "thawDate", "type": { "option": "i64" } },
+        { "name": "enforceRoyalties", "type": "bool" },
+        { "name": "name", "type": "string" }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "CandyMachineV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "wallet", "type": "publicKey" },
+          { "name": "itemsRedeemed", "type": "u64" },
+          { "name": "data", "type": { "defined": "CandyMachineDataV2" } }
+        ]
+      }
+    },
+    {
+      "name": "CandyMachineV3",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "seed", "type": "publicKey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "wallet", "type": "publicKey" },
+          { "name": "itemsRedeemed", "type": "u64" },
+          { "name": "data", "type": { "defined": "CandyMachineDataV2" } }
+        ]
+      }
+    },
+    {
+      "name": "CandyMachineV4",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "seed", "type": "publicKey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "wallet", "type": "publicKey" },
+          { "name": "itemsRedeemed", "type": "u64" },
+          { "name": "data", "type": { "defined": "CandyMachineDataV2" } },
+          { "name": "thawDate", "type": { "option": "i64" } },
+          { "name": "allowThaw", "type": "bool" },
+          { "name": "revealedUri", "type": { "option": "string" } }
+        ]
+      }
+    },
+    {
+      "name": "CandyMachineV5",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "seed", "type": "publicKey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "wallet", "type": "publicKey" },
+          { "name": "itemsRedeemed", "type": "u64" },
+          { "name": "thawDate", "type": { "option": "i64" } },
+          { "name": "allowThaw", "type": "bool" },
+          { "name": "revealedUri", "type": { "option": "string" } },
+          { "name": "data", "type": { "defined": "CandyMachineDataV3" } },
+          { "name": "requiredSigned", "type": { "option": "publicKey" } }
+        ]
+      }
+    },
+    {
+      "name": "CandyMachineV6",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "seed", "type": "publicKey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "authority", "type": "publicKey" },
+          { "name": "wallet", "type": "publicKey" },
+          { "name": "itemsRedeemed", "type": "u64" },
+          { "name": "thawDate", "type": { "option": "i64" } },
+          { "name": "allowThaw", "type": "bool" },
+          { "name": "revealedUri", "type": { "option": "string" } },
+          { "name": "data", "type": { "defined": "CandyMachineDataV3" } },
+          { "name": "requiredSigned", "type": { "option": "publicKey" } },
+          { "name": "name", "type": "string" },
+          { "name": "enforceRoyalties", "type": "bool" },
+          { "name": "collectionMint", "type": { "option": "publicKey" } }
+        ]
+      }
+    },
+    {
+      "name": "TotalMints",
+      "type": {
+        "kind": "struct",
+        "fields": [{ "name": "total", "type": "u32" }]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "PublicMode",
+      "type": {
+        "kind": "struct",
+        "fields": [{ "name": "mintsPerUser", "type": { "option": "u32" } }]
+      }
+    },
+    {
+      "name": "WhitelistTokenMode",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "tokenMint", "type": "publicKey" },
+          { "name": "burn", "type": "bool" }
+        ]
+      }
+    },
+    {
+      "name": "NFTHolderMode",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "verifiedCreator", "type": "publicKey" },
+          { "name": "mintsPerNft", "type": "u32" }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistWalletListMode",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "mintsPerUser", "type": "u32" },
+          { "name": "merkleRoot", "type": { "array": ["u8", 32] } }
+        ]
+      }
+    },
+    {
+      "name": "SaleFaze",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "start", "type": "i64" },
+          { "name": "price", "type": "u64" },
+          { "name": "currency", "type": { "option": "publicKey" } },
+          { "name": "whitelistMode", "type": { "defined": "WhitelistMode" } },
+          { "name": "name", "type": "string" }
+        ]
+      }
+    },
+    {
+      "name": "CandyMachineDataV3",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "itemsAvailable", "type": "u64" },
+          { "name": "goLiveDate", "type": "i64" },
+          { "name": "symbol", "type": "string" },
+          { "name": "sellerFeeBasisPoints", "type": "u16" },
+          { "name": "creators", "type": { "vec": { "defined": "Creator" } } },
+          { "name": "isMutable", "type": "bool" },
+          { "name": "retainAuthority", "type": "bool" },
+          { "name": "baseUrl", "type": "string" },
+          { "name": "saleFazes", "type": { "vec": { "defined": "SaleFaze" } } }
+        ]
+      }
+    },
+    {
+      "name": "CandyMachineDataV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "price", "type": "u64" },
+          { "name": "itemsAvailable", "type": "u64" },
+          { "name": "goLiveDate", "type": "i64" },
+          { "name": "symbol", "type": "string" },
+          { "name": "sellerFeeBasisPoints", "type": "u16" },
+          { "name": "creators", "type": { "vec": { "defined": "Creator" } } },
+          { "name": "isMutable", "type": "bool" },
+          { "name": "retainAuthority", "type": "bool" },
+          { "name": "baseUrl", "type": "string" },
+          { "name": "mintsPerUser", "type": { "option": "u32" } },
+          {
+            "name": "whitelist",
+            "type": { "option": { "defined": "WhitelistV2" } }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "merkleRoot", "type": { "array": ["u8", 32] } },
+          { "name": "mintsPerUser", "type": { "option": "u32" } },
+          { "name": "goLiveDate", "type": "i64" },
+          { "name": "price", "type": { "option": "u64" } }
+        ]
+      }
+    },
+    {
+      "name": "CandyMachineData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "uuid", "type": "string" },
+          { "name": "price", "type": "u64" },
+          { "name": "itemsAvailable", "type": "u64" },
+          { "name": "goLiveDate", "type": { "option": "i64" } }
+        ]
+      }
+    },
+    {
+      "name": "Creator",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "address", "type": "publicKey" },
+          { "name": "verified", "type": "bool" },
+          { "name": "share", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistMode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "WalletBased",
+            "fields": [
+              {
+                "name": "info",
+                "type": { "defined": "WhitelistWalletListMode" }
+              }
+            ]
+          },
+          {
+            "name": "TokenBased",
+            "fields": [
+              { "name": "info", "type": { "defined": "WhitelistTokenMode" } }
+            ]
+          },
+          {
+            "name": "Public",
+            "fields": [{ "name": "info", "type": { "defined": "PublicMode" } }]
+          },
+          {
+            "name": "NFTBased",
+            "fields": [
+              { "name": "info", "type": { "defined": "NFTHolderMode" } }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorCode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "IncorrectOwner" },
+          { "name": "Uninitialized" },
+          { "name": "MintMismatch" },
+          { "name": "IndexGreaterThanLength" },
+          { "name": "ConfigMustHaveAtleastOneEntry" },
+          { "name": "NumericalOverflowError" },
+          { "name": "TooManyCreators" },
+          { "name": "UuidMustBeExactly6Length" },
+          { "name": "NotEnoughTokens" },
+          { "name": "NotEnoughSOL" },
+          { "name": "TokenTransferFailed" },
+          { "name": "CandyMachineEmpty" },
+          { "name": "CandyMachineNotLiveYet" },
+          { "name": "ConfigLineMismatch" },
+          { "name": "WhitelistExists" },
+          { "name": "WhiteListMissing" },
+          { "name": "WrongWhitelist" },
+          { "name": "NotWhitelisted" },
+          { "name": "InvalidFraction" },
+          { "name": "BumpMissing" },
+          { "name": "PriceViolation" },
+          { "name": "NotThawable" },
+          { "name": "TeePot" },
+          { "name": "PresentProof" },
+          { "name": "InvalidDiscriminator" },
+          { "name": "InvalidCollection" }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "address": "ArAA6CZC123yMJLUe4uisBEgvfuw2WEvex9iFmFCYiXv"
+  }
+}
