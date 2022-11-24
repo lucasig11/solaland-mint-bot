@@ -4,6 +4,10 @@
     "magiceden",
     "launch-my-nft"
   ],
+  "scripts": {
+    "run:me": "ts-node magiceden/index.ts",
+    "run:lmn": "ts-node launch-my-nft/bot/index.ts"
+  },
   "dependencies": {
     "@metaplex-foundation/js": "^0.17.6",
     "@project-serum/anchor": "^0.25.0",

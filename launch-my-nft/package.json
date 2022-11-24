@@ -1,7 +1,4 @@
 {
   "name": "launch-my-nft",
-  "version": "1.0.0",
-  "scripts": {
-    "run:lmn": "ts-node bot/index.ts"
-  }
+  "version": "1.0.0"
 }
