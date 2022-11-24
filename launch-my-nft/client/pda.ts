@@ -3,11 +3,13 @@ import { PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID } from "./gen/programId";
 
 export const getTotalMintsAddress = ({
-  mint,
+  payer,
+  candyMachine,
 }: {
-  mint: PublicKey;
+  payer: PublicKey;
+  candyMachine: PublicKey;
 }): PublicKey =>
   findProgramAddressSync(
-    [Buffer.from("total_mints"), mint.toBuffer()],
+    [Buffer.from("TotalMints"), payer.toBuffer(), candyMachine.toBuffer()],
     PROGRAM_ID
   )[0];
