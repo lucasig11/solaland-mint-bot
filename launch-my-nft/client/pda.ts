@@ -2,7 +2,7 @@ import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pub
 import { PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID } from "./gen/programId";
 
-export const getTotalMintsAddress = ({
+export const findTotalMintsAddress = ({
   payer,
   candyMachine,
 }: {

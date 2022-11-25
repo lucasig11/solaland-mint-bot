@@ -12,14 +12,14 @@ import {
 import { mintV5, mintV6 } from "./gen/instructions";
 import { Metaplex } from "@metaplex-foundation/js";
 import BN from "bn.js";
-import { getTotalMintsAddress } from "./pda";
+import { findTotalMintsAddress } from "./pda";
 
 interface MintV5Args {
   candyMachine: PublicKey;
   mint: PublicKey;
   payer: PublicKey;
   wallet: PublicKey;
-  wallet2: PublicKey;
+  feeWallet: PublicKey;
 }
 
 type MintV6Args = MintV5Args;
@@ -43,14 +43,15 @@ export const LaunchMyNftCmClient = (connection: Connection): Client => {
     mint,
     payer,
     wallet,
-    wallet2,
+    feeWallet: wallet2,
   }: MintV6Args) => {
     const metadata = metaplex.nfts().pdas().metadata({ mint });
     const masterEdition = metaplex.nfts().pdas().masterEdition({ mint });
     const associated = getAssociatedTokenAddressSync(mint, payer);
-    const totalMints = getTotalMintsAddress({ candyMachine, payer });
+    const totalMints = findTotalMintsAddress({ candyMachine, payer });
 
     const expect = new BN([0x00, 0x87, 0x93, 0x03], "le");
+
     return mintV5(
       { expect, proof: [] },
       {
@@ -76,12 +77,12 @@ export const LaunchMyNftCmClient = (connection: Connection): Client => {
     mint,
     payer,
     wallet,
-    wallet2,
+    feeWallet: wallet2,
   }: MintV6Args) => {
     const metadata = metaplex.nfts().pdas().metadata({ mint });
     const masterEdition = metaplex.nfts().pdas().masterEdition({ mint });
     const associated = getAssociatedTokenAddressSync(mint, payer);
-    const totalMints = getTotalMintsAddress({ candyMachine, payer });
+    const totalMints = findTotalMintsAddress({ candyMachine, payer });
 
     const expect = new BN([0x00, 0x94, 0x35, 0x77], "le");
 
