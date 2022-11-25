@@ -1,4 +1,14 @@
 {
   "name": "launch-my-nft",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "main": "./bot/index.ts",
+  "bin": {
+    "lmn-mint": "./bot/index.ts"
+  },
+  "scripts": {
+    "start": "ts-node bot/index.ts",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "local": "yarn add -g && lmn-mint"
+  }
 }
