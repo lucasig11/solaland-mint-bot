@@ -40,34 +40,6 @@ export const decodeCandyMachine = (
   ].decode(data);
 };
 
-export const fetchLmnCollections = async (owner: PublicKey) => {
-  const searches = [
-    {
-      query_by: "owner",
-      sort_by: "deployed:desc,fractionMinted:desc",
-      exclude_fields: "collectionBannerUrl",
-      highlight_full_fields: "owner",
-      collection: "collections",
-      q: `${owner}`,
-      facet_by: "",
-      page: 1,
-    },
-  ];
-
-  const res = await axios.post(
-    "https://s.launchmynft.io/multi_search",
-    JSON.stringify({ data: { searches } }),
-    {
-      params: {
-        "x-typesense-api-key":
-          "UkN4Vnd3V2JMWWVIRlFNcTJ3dng4VGVtMGtvVGxBcmJJTTFFYS9MNXp1WT1Ha3dueyJmaWx0ZXJfYnkiOiJoaWRkZW46ZmFsc2UiLCJleGNsdWRlX2ZpZWxkcyI6ImhpZGRlbiIsInF1ZXJ5X2J5IjoiY29sbGVjdGlvbk5hbWUsb3duZXIiLCJsaW1pdF9oaXRzIjoyMDAsInNuaXBwZXRfdGhyZXNob2xkIjo1MH0=",
-      },
-    }
-  );
-
-  return res.data.results[0].hits;
-};
-
 /* Private helpers */
 const getCandyMachineVersion = (data: Buffer): CandyMachineVersion => {
   const disc = data.subarray(0, 8).toString();
