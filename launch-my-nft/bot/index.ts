@@ -6,26 +6,35 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { LaunchMyNftCmClient } from "../client";
-import { CandyMachineV5 } from "../client/gen/accounts";
 import { resolve } from "path";
 import { readFileSync } from "fs";
+
+import { LaunchMyNftCmClient } from "../client";
 import {
   decodeCandyMachine,
-  getCandyMachines,
+  // getCandyMachines,
   getCandyMachineVersion,
 } from "../client/utils";
 
-const RPC_URL = "https://ssc-dao.genesysgo.net";
+// Path to the payer's keypair file.
 const PAYER_KEYPAIR_FILE = resolve(__dirname, "..", "..", "keypair.json");
-const CANDY_MACHINE_ADDRESS = new PublicKey(
-  "Fqr9tGtG7rXG3Q9hWWZeyDG5o5d6UFqzjYFNaBfSEBF4"
-);
+
+// Launch my NFT fee wallet (should be the same for every mint/candy machine).
 const LMN_FEE_WALLET = new PublicKey(
   "33nQCgievSd3jJLSWFBefH3BJRN7h6sAoS82VFFdJGF5"
 );
-const LMN_COLLECTION_URL =
-  "https://www.launchmynft.io/collections/EZNvQ7aLyWXCiyHkLb33zcQvA6aefCFqaRzS4W8Ksk7o/0ff2ru6oDKayfazEIZOS";
+
+// Solana JsonRPC URL.
+const RPC_URL = "https://ssc-dao.genesysgo.net";
+
+// TODO: remove this constant once we can find the owner's candy machines.
+const CANDY_MACHINE_ADDRESS = new PublicKey(
+  "Fqr9tGtG7rXG3Q9hWWZeyDG5o5d6UFqzjYFNaBfSEBF4"
+);
+
+// TODO: use this constant instead of CANDY_MACHINE_ADDRESS
+// Collection creator (can be found through the collection page URL at LaunchMyNFT website).
+// const COLLECTION_CREATOR = "EZNvQ7aLyWXCiyHkLb33zcQvA6aefCFqaRzS4W8Ksk7o";
 
 (async () => {
   const connection = new Connection(RPC_URL);
@@ -36,14 +45,15 @@ const LMN_COLLECTION_URL =
     Uint8Array.from(JSON.parse(readFileSync(PAYER_KEYPAIR_FILE, "utf8")))
   );
 
-  const collectionCreator = LMN_COLLECTION_URL.split("/").at(-2);
-  if (!collectionCreator) throw new Error("Invalid URL");
-
-  const candyMachines = await getCandyMachines(
-    connection,
-    new PublicKey(collectionCreator)
-  );
-  console.log("cms", candyMachines.pop());
+  // TODO: find collection candy machine instead of using a static constant.
+  // const candyMachines = await getCandyMachines(
+  //   connection,
+  //   new PublicKey(COLLECTION_CREATOR)
+  // );
+  // console.log(
+  //   "Owner candy machines:",
+  //   candyMachines.map((c) => c.toJSON())
+  // );
 
   const accInfo = await connection.getAccountInfo(CANDY_MACHINE_ADDRESS);
   if (!accInfo) throw new Error("Account not found!");
