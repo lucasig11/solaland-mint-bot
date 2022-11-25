@@ -1,5 +1,4 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import axios from "axios";
 import {
   CandyMachineV2,
   CandyMachineV3,
