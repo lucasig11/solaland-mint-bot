@@ -3,12 +3,7 @@ import {
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import {
-  Connection,
-  PublicKey,
-  SystemProgram,
-  TransactionInstruction,
-} from "@solana/web3.js";
+import { Connection, PublicKey, SystemProgram } from "@solana/web3.js";
 import { mintV5, mintV6 } from "./gen/instructions";
 import { Metaplex } from "@metaplex-foundation/js";
 import BN from "bn.js";
@@ -24,14 +19,7 @@ interface MintV5Args {
 
 type MintV6Args = MintV5Args;
 
-type ClientInstruction<R> = (a: R) => TransactionInstruction;
-
-interface Client {
-  createMintV5Instruction: ClientInstruction<MintV5Args>;
-  createMintV6Instruction: ClientInstruction<MintV6Args>;
-}
-
-export const LaunchMyNftCmClient = (connection: Connection): Client => {
+export const LaunchMyNftCmClient = (connection: Connection) => {
   const systemProgram = SystemProgram.programId;
   const tokenProgram = TOKEN_PROGRAM_ID;
   const associatedTokenProgram = ASSOCIATED_TOKEN_PROGRAM_ID;

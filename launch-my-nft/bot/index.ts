@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import {
   Connection,
   Keypair,
@@ -5,30 +6,60 @@ import {
   sendAndConfirmTransaction,
   Transaction,
 } from "@solana/web3.js";
-import { readFileSync } from "fs";
 import { LaunchMyNftCmClient } from "../client";
 import { getVersionedCandyMachine } from "../client/utils";
 import { fromTxError } from "../client/gen/errors";
-import { readConfigFile } from "./config";
+import { readConfigFile, Task } from "./config";
+import { formatTask, getCollectionFromUrl, readKeypairFile } from "./utils";
 
 // Launch my NFT fee wallet (should be the same for every mint/candy machine).
 const LMN_FEE_WALLET = "33nQCgievSd3jJLSWFBefH3BJRN7h6sAoS82VFFdJGF5";
 
-(async () => {
-  const { rpcUrl, collectionHyperspaceUrl, payerKeypairFile } =
-    readConfigFile("../config.json");
+interface IRunTask {
+  connection: Connection;
+  client: ReturnType<typeof LaunchMyNftCmClient>;
+  feeWallet: PublicKey;
+  interval: number;
+  task: Task;
+}
 
+async function main() {
+  const { rpcUrl, interval, tasks } = readConfigFile("config.json");
   const connection = new Connection(rpcUrl);
   const feeWallet = new PublicKey(LMN_FEE_WALLET);
-  const mint = Keypair.generate();
   const client = LaunchMyNftCmClient(connection);
-  const payer = Keypair.fromSecretKey(
-    Uint8Array.from(JSON.parse(readFileSync(payerKeypairFile, "utf8")))
+
+  console.log("SolaLand Mint Bot v1.0.0");
+  console.log("========================================");
+  console.log("RPC URL:", rpcUrl);
+  console.log("Interval:", interval, "ms");
+  console.log(
+    tasks.map((t, i) => `Task #${i + 1}:\n  ${formatTask(t)}`).join("\n")
   );
+  console.log("========================================");
+  console.log("Use CTRL+C to quit.");
 
-  const address = collectionHyperspaceUrl.split("/").pop();
-  if (!address) throw new Error("Invalid collection URL");
+  while (true) {
+    const now = new Date();
+    for (const task of tasks) {
+      if (task.startDate > now) continue;
+      await runTask({ connection, client, feeWallet, interval, task });
+    }
 
+    // Sleep for 1 second
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+}
+
+async function runTask({
+  client,
+  connection,
+  feeWallet,
+  interval,
+  task: { hyperspaceUrl, maxMintAmount, payerKeypairFile },
+}: IRunTask) {
+  const address = getCollectionFromUrl(hyperspaceUrl);
+  const payer = readKeypairFile(payerKeypairFile);
   const candyMachineAddress = new PublicKey(address);
   const candyMachine = await getVersionedCandyMachine(
     connection,
@@ -36,31 +67,48 @@ const LMN_FEE_WALLET = "33nQCgievSd3jJLSWFBefH3BJRN7h6sAoS82VFFdJGF5";
   );
   if (!candyMachine) throw new Error("Candy machine not found!");
 
-  if (
-    candyMachine.version === "V2" ||
-    candyMachine.version === "V3" ||
-    candyMachine.version === "V4"
-  )
-    throw new Error("Unsupported candy machine version!");
-
-  const ix = client[`createMint${candyMachine.version}Instruction`]({
-    feeWallet,
-    mint: mint.publicKey,
-    payer: payer.publicKey,
-    wallet: candyMachine.wallet,
-    candyMachine: candyMachineAddress,
-  });
-
   try {
-    const tx = new Transaction().add(ix);
-    const txSig = await sendAndConfirmTransaction(connection, tx, [
-      payer,
-      mint,
-    ]);
-    console.log("Transaction signature:", txSig);
+    const txs = await Promise.all(
+      Array(maxMintAmount)
+        .fill(0)
+        .map(async () => {
+          if (
+            candyMachine.version === "V2" ||
+            candyMachine.version === "V3" ||
+            candyMachine.version === "V4"
+          )
+            throw new Error("Unsupported candy machine version!");
+
+          const mint = Keypair.generate();
+          const ix = client[`createMint${candyMachine.version}Instruction`]({
+            feeWallet,
+            mint: mint.publicKey,
+            payer: payer.publicKey,
+            wallet: candyMachine.wallet,
+            candyMachine: candyMachineAddress,
+          });
+
+          const tx = new Transaction().add(ix);
+          const txSig = await sendAndConfirmTransaction(connection, tx, [
+            payer,
+            mint,
+          ]);
+
+          // Wait interval
+          await new Promise((resolve) => setTimeout(resolve, interval));
+
+          return txSig;
+        })
+    );
+    console.log(txs.join("\n"));
   } catch (e) {
     const parsed = fromTxError(e);
     if (parsed) throw parsed;
     throw e;
   }
-})().then(() => console.log("done!"));
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

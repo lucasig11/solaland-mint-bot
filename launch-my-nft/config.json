@@ -1,5 +1,12 @@
 {
   "rpcUrl": "https://solana-mainnet.g.alchemy.com/v2/bB-1A4zRy6e8n3OQcLsd1tk8Ni2KBwKr",
-  "collectionHyperspaceUrl": "https://hyperspace.xyz/collection/Fqr9tGtG7rXG3Q9hWWZeyDG5o5d6UFqzjYFNaBfSEBF4",
-  "payerKeypairFile": "../keypair.json"
+  "interval": 1000,
+  "tasks": [
+    {
+      "maxMintAmount": 30,
+      "payerKeypairFile": "../keypair.json",
+      "startDate": "2022-11-28 18:58:00",
+      "hyperspaceUrl": "https://hyperspace.xyz/collection/Fqr9tGtG7rXG3Q9hWWZeyDG5o5d6UFqzjYFNaBfSEBF4"
+    }
+  ]
 }
