@@ -9,8 +9,8 @@ import {
 import { LaunchMyNftCmClient } from "../client";
 import { getVersionedCandyMachine } from "../client/utils";
 import { fromTxError } from "../client/gen/errors";
-import { readConfigFile, Task } from "./config";
-import { formatTask, getCollectionFromUrl, readKeypairFile } from "./utils";
+import { readConfigFile } from "./config";
+import { ITask, watchTasks, formatTask } from "./tasks";
 
 // Launch my NFT fee wallet (should be the same for every mint/candy machine).
 const LMN_FEE_WALLET = "33nQCgievSd3jJLSWFBefH3BJRN7h6sAoS82VFFdJGF5";
@@ -20,31 +20,50 @@ interface IRunTask {
   client: ReturnType<typeof LaunchMyNftCmClient>;
   feeWallet: PublicKey;
   interval: number;
-  task: Task;
+  task: ITask;
 }
 
 async function main() {
-  const { rpcUrl, interval, tasks } = readConfigFile("config.json");
+  const { rpcUrl, interval } = readConfigFile("config.json");
   const connection = new Connection(rpcUrl);
   const feeWallet = new PublicKey(LMN_FEE_WALLET);
   const client = LaunchMyNftCmClient(connection);
+  const schedule: ITask[] = [];
 
   console.log("SolaLand Mint Bot v1.0.0");
+  console.log("Use CTRL+C to quit.\n");
   console.log("========================================");
   console.log("RPC URL:", rpcUrl);
-  console.log("Interval:", interval, "ms");
-  console.log(
-    tasks.map((t, i) => `Task #${i + 1}:\n  ${formatTask(t)}`).join("\n")
-  );
-  console.log("========================================");
-  console.log("Use CTRL+C to quit.");
+  console.log("Interval between RPC calls:", interval, "ms");
+
+  await watchTasks("tasks.json", async (newTasks) => {
+    process.stdout.clearLine(0);
+    console.log(`Found ${newTasks.length} new task(s).`);
+    console.log("========================================");
+    schedule.push(...newTasks);
+  });
 
   while (true) {
     const now = new Date();
-    for (const task of tasks) {
-      if (task.startDate > now) continue;
-      await runTask({ connection, client, feeWallet, interval, task });
+    let task: ITask | undefined;
+
+    while ((task = schedule.shift())) {
+      if (task.startDate <= now) {
+        console.log(`Running task:\n  ${formatTask(task)}`);
+        try {
+          await runTask({ connection, client, feeWallet, interval, task });
+          console.log("Task completed.");
+        } catch (e) {
+          console.error("Task failed:");
+          const err = e as { logs?: string[] };
+          console.error(err.logs || "");
+        } finally {
+          console.log("========================================");
+        }
+      }
     }
+
+    process.stdout.write("No task to run. Waiting for new tasks...\r");
 
     // Sleep for 1 second
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -56,11 +75,8 @@ async function runTask({
   connection,
   feeWallet,
   interval,
-  task: { hyperspaceUrl, maxMintAmount, payerKeypairFile },
+  task: { candyMachineAddress, maxMintAmount, payer },
 }: IRunTask) {
-  const address = getCollectionFromUrl(hyperspaceUrl);
-  const payer = readKeypairFile(payerKeypairFile);
-  const candyMachineAddress = new PublicKey(address);
   const candyMachine = await getVersionedCandyMachine(
     connection,
     candyMachineAddress
