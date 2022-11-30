@@ -537,6 +537,17 @@
     "@metaplex-foundation/mpl-core" "^0.6.1"
     "@solana/web3.js" "^1.35.1"
 
+"@metaplex-foundation/mpl-candy-machine@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@metaplex-foundation/mpl-candy-machine/-/mpl-candy-machine-5.0.0.tgz#2eae8f02a1479c62ef9b9b521215988d6fc06818"
+  integrity sha512-df2OmZ4s8PJXQXtGAyfZIIitwJPKebtj4f8tab/o5VNhYsW5M9YKfMyAEBBNHm1n/xz+C8Lxy05e6qo3nU/30g==
+  dependencies:
+    "@metaplex-foundation/beet" "^0.7.1"
+    "@metaplex-foundation/beet-solana" "^0.4.0"
+    "@metaplex-foundation/cusper" "^0.0.2"
+    "@solana/spl-token" "^0.3.6"
+    "@solana/web3.js" "^1.66.2"
+
 "@metaplex-foundation/mpl-core@^0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@metaplex-foundation/mpl-core/-/mpl-core-0.6.1.tgz#bdc76a8b447a2ef310693973bf430e5ecec6ef0b"
