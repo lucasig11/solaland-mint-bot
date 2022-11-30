@@ -2,15 +2,15 @@
   "name": "sll-mint-bot",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "./bot/index.ts",
+  "main": "./src/lib/index.ts",
   "bin": {
-    "sll-mint-bot": "./dist/bot/cli/bin.js"
+    "sll-mint-bot": "./dist/cli/bin.js"
   },
   "scripts": {
-    "dev": "ts-node-dev --transpile-only --respawn --clear --ignore-watch node_modules bot/cli/bin.ts",
+    "dev": "ts-node-dev --transpile-only --respawn --clear --ignore-watch node_modules ./src/cli/bin.ts",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "local": "yarn global add $PWD && lmn-mint"
+    "local": "yarn global add $PWD && sll-mint-bot"
   },
   "dependencies": {
     "@metaplex-foundation/js": "^0.17.6",
@@ -20,8 +20,7 @@
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.66.2",
     "base58-js": "^1.0.5",
-    "bn.js": "^5.2.1",
-    "date-fns": "^2.29.3"
+    "bn.js": "^5.2.1"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",

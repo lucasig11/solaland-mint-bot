@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-import { start } from "..";
-import Scheduler from "../scheduler";
-import { IMintTask } from "../tasks";
+import { start, Scheduler, IMintTask } from "../lib";
 import { readConfigFile, watchTaskFile } from "./utils";
 
 async function main() {

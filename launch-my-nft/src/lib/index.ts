@@ -2,12 +2,12 @@ import { Connection } from "@solana/web3.js";
 import { IMintTask, formatTask, runMintTask } from "./tasks";
 import Scheduler from "./scheduler";
 
-export interface IConfig {
+interface IConfig {
   rpcUrl: string;
   interval: number;
 }
 
-export async function start(
+async function start(
   { rpcUrl, interval }: IConfig,
   scheduler: Scheduler<IMintTask>
 ) {
@@ -17,3 +17,5 @@ export async function start(
     await runMintTask({ connection, interval, task });
   });
 }
+
+export { start, Scheduler, IConfig, IMintTask };
