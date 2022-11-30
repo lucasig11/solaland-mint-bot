@@ -1,10 +1,9 @@
 import * as path from "path";
 import * as fs from "fs";
-import { PublicKey } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 
-import { IConfig } from "..";
-import { IMintTask, newMintTask } from "../tasks";
-import { getCandyMachineFromUrl } from "../utils";
+import { IConfig } from "../lib";
+import { IMintTask } from "../lib/tasks"
 
 type RawMetaplexTask = {
   metaplex: {
@@ -116,4 +115,32 @@ export const readConfigFile = (file: string): IConfig => {
   }) as IConfig;
 
   return parsed;
+};
+
+const newMintTask = (
+  payerKeypairFile: string,
+  candyMachineAddress: PublicKey,
+  startDate: Date,
+  maxMintAmount: number,
+  provider: "metaplex" | "launch-my-nft"
+): IMintTask => {
+  return {
+    startDate,
+    maxMintAmount,
+    payer: readKeypairFile(payerKeypairFile),
+    candyMachineAddress,
+    provider,
+  };
+};
+
+export const readKeypairFile = (file: string): Keypair => {
+  return Keypair.fromSecretKey(
+    Uint8Array.from(JSON.parse(fs.readFileSync(file, "utf8")))
+  );
+};
+
+export const getCandyMachineFromUrl = (url: string): PublicKey => {
+  const address = url.split("/").pop();
+  if (!address) throw new Error("Invalid collection URL");
+  return new PublicKey(address);
 };

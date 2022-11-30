@@ -7,7 +7,6 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { readKeypairFile } from "./utils";
 import { resolve } from "./providers/CandyMachineProvider";
 
 export interface IMintTask {
@@ -69,18 +68,3 @@ export const formatTask = ({
     Start date: ${startDate}`;
 };
 
-export const newMintTask = (
-  payerKeypairFile: string,
-  candyMachineAddress: PublicKey,
-  startDate: Date,
-  maxMintAmount: number,
-  provider: "metaplex" | "launch-my-nft"
-): IMintTask => {
-  return {
-    startDate,
-    maxMintAmount,
-    payer: readKeypairFile(payerKeypairFile),
-    candyMachineAddress,
-    provider,
-  };
-};

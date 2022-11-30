@@ -1,10 +1,9 @@
 import { PublicKey } from "@solana/web3.js" // eslint-disable-line @typescript-eslint/no-unused-vars
 import BN from "bn.js" // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from "../types" // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "." // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as borsh from "@project-serum/borsh"
 
-export interface CandyMachineDataV2Fields {
-  price: BN
+export interface CandyMachineDataV3Fields {
   itemsAvailable: BN
   goLiveDate: BN
   symbol: string
@@ -13,12 +12,10 @@ export interface CandyMachineDataV2Fields {
   isMutable: boolean
   retainAuthority: boolean
   baseUrl: string
-  mintsPerUser: number | null
-  whitelist: types.WhitelistV2Fields | null
+  saleFazes: Array<types.SaleFazeFields>
 }
 
-export interface CandyMachineDataV2JSON {
-  price: string
+export interface CandyMachineDataV3JSON {
   itemsAvailable: string
   goLiveDate: string
   symbol: string
@@ -27,12 +24,10 @@ export interface CandyMachineDataV2JSON {
   isMutable: boolean
   retainAuthority: boolean
   baseUrl: string
-  mintsPerUser: number | null
-  whitelist: types.WhitelistV2JSON | null
+  saleFazes: Array<types.SaleFazeJSON>
 }
 
-export class CandyMachineDataV2 {
-  readonly price: BN
+export class CandyMachineDataV3 {
   readonly itemsAvailable: BN
   readonly goLiveDate: BN
   readonly symbol: string
@@ -41,11 +36,9 @@ export class CandyMachineDataV2 {
   readonly isMutable: boolean
   readonly retainAuthority: boolean
   readonly baseUrl: string
-  readonly mintsPerUser: number | null
-  readonly whitelist: types.WhitelistV2 | null
+  readonly saleFazes: Array<types.SaleFaze>
 
-  constructor(fields: CandyMachineDataV2Fields) {
-    this.price = fields.price
+  constructor(fields: CandyMachineDataV3Fields) {
     this.itemsAvailable = fields.itemsAvailable
     this.goLiveDate = fields.goLiveDate
     this.symbol = fields.symbol
@@ -56,16 +49,14 @@ export class CandyMachineDataV2 {
     this.isMutable = fields.isMutable
     this.retainAuthority = fields.retainAuthority
     this.baseUrl = fields.baseUrl
-    this.mintsPerUser = fields.mintsPerUser
-    this.whitelist =
-      (fields.whitelist && new types.WhitelistV2({ ...fields.whitelist })) ||
-      null
+    this.saleFazes = fields.saleFazes.map(
+      (item) => new types.SaleFaze({ ...item })
+    )
   }
 
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u64("price"),
         borsh.u64("itemsAvailable"),
         borsh.i64("goLiveDate"),
         borsh.str("symbol"),
@@ -74,8 +65,7 @@ export class CandyMachineDataV2 {
         borsh.bool("isMutable"),
         borsh.bool("retainAuthority"),
         borsh.str("baseUrl"),
-        borsh.option(borsh.u32(), "mintsPerUser"),
-        borsh.option(types.WhitelistV2.layout(), "whitelist"),
+        borsh.vec(types.SaleFaze.layout(), "saleFazes"),
       ],
       property
     )
@@ -83,8 +73,7 @@ export class CandyMachineDataV2 {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new CandyMachineDataV2({
-      price: obj.price,
+    return new CandyMachineDataV3({
       itemsAvailable: obj.itemsAvailable,
       goLiveDate: obj.goLiveDate,
       symbol: obj.symbol,
@@ -97,15 +86,16 @@ export class CandyMachineDataV2 {
       isMutable: obj.isMutable,
       retainAuthority: obj.retainAuthority,
       baseUrl: obj.baseUrl,
-      mintsPerUser: obj.mintsPerUser,
-      whitelist:
-        (obj.whitelist && types.WhitelistV2.fromDecoded(obj.whitelist)) || null,
+      saleFazes: obj.saleFazes.map(
+        (
+          item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */
+        ) => types.SaleFaze.fromDecoded(item)
+      ),
     })
   }
 
-  static toEncodable(fields: CandyMachineDataV2Fields) {
+  static toEncodable(fields: CandyMachineDataV3Fields) {
     return {
-      price: fields.price,
       itemsAvailable: fields.itemsAvailable,
       goLiveDate: fields.goLiveDate,
       symbol: fields.symbol,
@@ -114,16 +104,14 @@ export class CandyMachineDataV2 {
       isMutable: fields.isMutable,
       retainAuthority: fields.retainAuthority,
       baseUrl: fields.baseUrl,
-      mintsPerUser: fields.mintsPerUser,
-      whitelist:
-        (fields.whitelist && types.WhitelistV2.toEncodable(fields.whitelist)) ||
-        null,
+      saleFazes: fields.saleFazes.map((item) =>
+        types.SaleFaze.toEncodable(item)
+      ),
     }
   }
 
-  toJSON(): CandyMachineDataV2JSON {
+  toJSON(): CandyMachineDataV3JSON {
     return {
-      price: this.price.toString(),
       itemsAvailable: this.itemsAvailable.toString(),
       goLiveDate: this.goLiveDate.toString(),
       symbol: this.symbol,
@@ -132,14 +120,12 @@ export class CandyMachineDataV2 {
       isMutable: this.isMutable,
       retainAuthority: this.retainAuthority,
       baseUrl: this.baseUrl,
-      mintsPerUser: this.mintsPerUser,
-      whitelist: (this.whitelist && this.whitelist.toJSON()) || null,
+      saleFazes: this.saleFazes.map((item) => item.toJSON()),
     }
   }
 
-  static fromJSON(obj: CandyMachineDataV2JSON): CandyMachineDataV2 {
-    return new CandyMachineDataV2({
-      price: new BN(obj.price),
+  static fromJSON(obj: CandyMachineDataV3JSON): CandyMachineDataV3 {
+    return new CandyMachineDataV3({
       itemsAvailable: new BN(obj.itemsAvailable),
       goLiveDate: new BN(obj.goLiveDate),
       symbol: obj.symbol,
@@ -148,13 +134,11 @@ export class CandyMachineDataV2 {
       isMutable: obj.isMutable,
       retainAuthority: obj.retainAuthority,
       baseUrl: obj.baseUrl,
-      mintsPerUser: obj.mintsPerUser,
-      whitelist:
-        (obj.whitelist && types.WhitelistV2.fromJSON(obj.whitelist)) || null,
+      saleFazes: obj.saleFazes.map((item) => types.SaleFaze.fromJSON(item)),
     })
   }
 
   toEncodable() {
-    return CandyMachineDataV2.toEncodable(this)
+    return CandyMachineDataV3.toEncodable(this)
   }
 }
