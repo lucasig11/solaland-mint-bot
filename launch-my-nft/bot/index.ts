@@ -1,16 +1,16 @@
 import { Connection } from "@solana/web3.js";
-import { ITask, watchTasks, formatTask, runMintTask } from "./tasks";
+import { IMintTask, watchTasks, formatTask, runMintTask } from "./tasks";
 import { IConfig } from "./config";
 
 export async function run({ rpcUrl, interval }: IConfig) {
   const connection = new Connection(rpcUrl);
-  const schedule: ITask[] = [];
+  const schedule: IMintTask[] = [];
 
   await watchTasks("tasks.json", (newTasks) => schedule.push(...newTasks));
 
   while (true) {
     const now = new Date();
-    let task: ITask | undefined;
+    let task: IMintTask | undefined;
 
     while ((task = schedule.shift())) {
       if (task.startDate <= now) {

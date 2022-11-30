@@ -6,37 +6,30 @@ import {
   sendAndConfirmTransaction,
   Signer,
   Transaction,
+  TransactionInstruction,
 } from "@solana/web3.js";
 import { getCandyMachineFromUrl, readKeypairFile } from "./utils";
 import { resolve } from "./providers/CandyMachineProvider";
 
 type RawMetaplexTask = {
-  startDate: string;
-  payerKeypairFile: string;
-  maxMintAmount: number;
   metaplex: {
     candyMachine: string;
   };
 };
 
 type RawLaunchMyNftTask = {
-  startDate: string;
-  payerKeypairFile: string;
-  maxMintAmount: number;
   launchMyNft: {
     hyperspaceUrl: string;
   };
 };
 
-type RawTask = RawMetaplexTask | RawLaunchMyNftTask;
+type RawTask = {
+  startDate: string;
+  payerKeypairFile: string;
+  maxMintAmount: number;
+} & (RawMetaplexTask | RawLaunchMyNftTask);
 
-interface IRunMintTask {
-  task: ITask;
-  interval: number;
-  connection: Connection;
-}
-
-export interface ITask {
+export interface IMintTask {
   payer: Signer;
   startDate: Date;
   maxMintAmount: number;
@@ -44,29 +37,19 @@ export interface ITask {
   provider: "metaplex" | "launch-my-nft";
 }
 
-export const newTask = (
-  payerKeypairFile: string,
-  candyMachineAddress: PublicKey,
-  startDate: Date,
-  maxMintAmount: number,
-  provider: "metaplex" | "launch-my-nft"
-): ITask => {
-  return {
-    startDate,
-    maxMintAmount,
-    payer: readKeypairFile(payerKeypairFile),
-    candyMachineAddress,
-    provider,
-  };
-};
+interface IRunMintTask {
+  task: IMintTask;
+  interval: number;
+  connection: Connection;
+}
 
 export const watchTasks = async (
   file: string,
-  onChange: (tasks: ITask[]) => void
+  onChange: (tasks: IMintTask[]) => void
 ) => {
   if (!fs.existsSync(file)) {
     console.log(`Tasks file "${file}" not found!`);
-    console.log("Creating a new file with placeholder values...");
+    console.log("Creating a new file with example values...");
     const defaultTasks: RawTask[] = [
       {
         startDate: "2021-08-01 18:30:00",
@@ -76,13 +59,22 @@ export const watchTasks = async (
         },
         maxMintAmount: 1,
       },
+      {
+        startDate: "2021-08-01 18:30:00",
+        payerKeypairFile: "payer.json",
+        metaplex: {
+          candyMachine: "candy_machine_address",
+        },
+        maxMintAmount: 1,
+      },
     ];
+
     fs.writeFileSync(file, JSON.stringify(defaultTasks, null, 2));
     console.log(`Tasks file created at ${file}! Please edit it and try again.`);
     process.exit(1);
   }
 
-  const oldTasks: ITask[] = [];
+  const oldTasks: IMintTask[] = [];
   let lastModified = 0;
   const update = async () => {
     const stats = await fs.promises.stat(file);
@@ -90,7 +82,7 @@ export const watchTasks = async (
       lastModified = stats.mtimeMs;
       const data = await fs.promises.readFile(file, "utf-8");
       const parsed = JSON.parse(data).map((v: RawTask) =>
-        newTask(
+        newMintTask(
           v.payerKeypairFile,
           "metaplex" in v
             ? new PublicKey(v.metaplex.candyMachine)
@@ -99,7 +91,7 @@ export const watchTasks = async (
           v.maxMintAmount,
           "metaplex" in v ? "metaplex" : "launch-my-nft"
         )
-      ) as ITask[];
+      ) as IMintTask[];
 
       const newTasks = parsed.filter(
         (t) => !oldTasks.find((s) => JSON.stringify(s) === JSON.stringify(t))
@@ -126,21 +118,23 @@ export async function runMintTask({
       .fill(0)
       .map(async () => {
         const mint = Keypair.generate();
-        const ix = await providerInstance.createMintInstruction({
-          mint: mint.publicKey,
-          payer: payer.publicKey,
-          candyMachine: candyMachineAddress,
-        });
-
+        return [
+          await providerInstance.createMintInstruction({
+            mint: mint.publicKey,
+            payer: payer.publicKey,
+            candyMachine: candyMachineAddress,
+          }),
+          mint,
+        ] as [TransactionInstruction, Keypair];
+      })
+      .map(async (p) => {
+        const [ix, mint] = await p;
         const tx = new Transaction().add(ix);
         const txSig = await sendAndConfirmTransaction(connection, tx, [
           payer,
           mint,
         ]);
-
-        // Wait interval
         await new Promise((resolve) => setTimeout(resolve, interval));
-
         return txSig;
       })
   );
@@ -151,9 +145,25 @@ export const formatTask = ({
   startDate,
   candyMachineAddress,
   maxMintAmount,
-}: ITask) => {
+}: IMintTask) => {
   return `  CM address: ${candyMachineAddress}
     Max mint amount: ${maxMintAmount}
     Payer: ${payer.publicKey}
     Start date: ${startDate}`;
+};
+
+const newMintTask = (
+  payerKeypairFile: string,
+  candyMachineAddress: PublicKey,
+  startDate: Date,
+  maxMintAmount: number,
+  provider: "metaplex" | "launch-my-nft"
+): IMintTask => {
+  return {
+    startDate,
+    maxMintAmount,
+    payer: readKeypairFile(payerKeypairFile),
+    candyMachineAddress,
+    provider,
+  };
 };
