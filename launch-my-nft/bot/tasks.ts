@@ -4,43 +4,59 @@ import {
   Keypair,
   PublicKey,
   sendAndConfirmTransaction,
+  Signer,
   Transaction,
 } from "@solana/web3.js";
 import { getCandyMachineFromUrl, readKeypairFile } from "./utils";
-import ICandyMachineProvider from "./providers/CandyMachineProvider";
+import { resolve } from "./providers/CandyMachineProvider";
 
-interface IRawTask {
+type RawMetaplexTask = {
   startDate: string;
   payerKeypairFile: string;
-  hyperspaceUrl: string;
   maxMintAmount: number;
-}
+  metaplex: {
+    candyMachine: string;
+  };
+};
 
-interface IRunMintTask<CandyMachine> {
+type RawLaunchMyNftTask = {
+  startDate: string;
+  payerKeypairFile: string;
+  maxMintAmount: number;
+  launchMyNft: {
+    hyperspaceUrl: string;
+  };
+};
+
+type RawTask = RawMetaplexTask | RawLaunchMyNftTask;
+
+interface IRunMintTask {
   task: ITask;
   interval: number;
   connection: Connection;
-  provider: ICandyMachineProvider<CandyMachine>;
 }
 
 export interface ITask {
-  payer: Keypair;
+  payer: Signer;
   startDate: Date;
   maxMintAmount: number;
   candyMachineAddress: PublicKey;
+  provider: "metaplex" | "launch-my-nft";
 }
 
 export const newTask = (
   payerKeypairFile: string,
-  hyperspaceUrl: string,
+  candyMachineAddress: PublicKey,
   startDate: Date,
-  maxMintAmount: number
+  maxMintAmount: number,
+  provider: "metaplex" | "launch-my-nft"
 ): ITask => {
   return {
     startDate,
     maxMintAmount,
     payer: readKeypairFile(payerKeypairFile),
-    candyMachineAddress: getCandyMachineFromUrl(hyperspaceUrl),
+    candyMachineAddress,
+    provider,
   };
 };
 
@@ -51,11 +67,13 @@ export const watchTasks = async (
   if (!fs.existsSync(file)) {
     console.log(`Tasks file "${file}" not found!`);
     console.log("Creating a new file with placeholder values...");
-    const defaultTasks: IRawTask[] = [
+    const defaultTasks: RawTask[] = [
       {
         startDate: "2021-08-01 18:30:00",
         payerKeypairFile: "payer.json",
-        hyperspaceUrl: "collection_hyperspace_url",
+        launchMyNft: {
+          hyperspaceUrl: "collection_hyperspace_url",
+        },
         maxMintAmount: 1,
       },
     ];
@@ -71,12 +89,15 @@ export const watchTasks = async (
     if (stats.mtimeMs > lastModified) {
       lastModified = stats.mtimeMs;
       const data = await fs.promises.readFile(file, "utf-8");
-      const parsed = JSON.parse(data).map((v: IRawTask) =>
+      const parsed = JSON.parse(data).map((v: RawTask) =>
         newTask(
           v.payerKeypairFile,
-          v.hyperspaceUrl,
+          "metaplex" in v
+            ? new PublicKey(v.metaplex.candyMachine)
+            : getCandyMachineFromUrl(v.launchMyNft.hyperspaceUrl),
           new Date(v.startDate),
-          v.maxMintAmount
+          v.maxMintAmount,
+          "metaplex" in v ? "metaplex" : "launch-my-nft"
         )
       ) as ITask[];
 
@@ -94,18 +115,18 @@ export const watchTasks = async (
   fs.watch(file, update);
 };
 
-export async function runMintTask<T>({
+export async function runMintTask({
   connection,
-  provider,
   interval,
-  task: { candyMachineAddress, maxMintAmount, payer },
-}: IRunMintTask<T>): Promise<string[]> {
+  task: { candyMachineAddress, maxMintAmount, payer, provider },
+}: IRunMintTask): Promise<string[]> {
+  const providerInstance = resolve(provider, connection);
   return Promise.all(
     Array(maxMintAmount)
       .fill(0)
       .map(async () => {
         const mint = Keypair.generate();
-        const ix = await provider.createMintInstruction({
+        const ix = await providerInstance.createMintInstruction({
           mint: mint.publicKey,
           payer: payer.publicKey,
           candyMachine: candyMachineAddress,
