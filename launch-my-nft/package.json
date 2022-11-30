@@ -1,13 +1,13 @@
 {
-  "name": "lmn-mint-bot",
+  "name": "sll-mint-bot",
   "version": "1.0.0",
   "license": "MIT",
   "main": "./bot/index.ts",
   "bin": {
-    "lmn-mint": "./dist/bot/bin.js"
+    "sll-mint-bot": "./dist/bot/cli/bin.js"
   },
   "scripts": {
-    "dev": "ts-node-dev --transpile-only --respawn --clear --ignore-watch node_modules bot/bin.ts",
+    "dev": "ts-node-dev --transpile-only --respawn --clear --ignore-watch node_modules bot/cli/bin.ts",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
     "local": "yarn global add $PWD && lmn-mint"
