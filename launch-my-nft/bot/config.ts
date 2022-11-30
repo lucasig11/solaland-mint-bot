@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-interface IConfig {
+export interface IConfig {
   rpcUrl: string;
   interval: number;
 }

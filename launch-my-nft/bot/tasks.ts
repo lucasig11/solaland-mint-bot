@@ -1,12 +1,26 @@
 import * as fs from "fs";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  sendAndConfirmTransaction,
+  Transaction,
+} from "@solana/web3.js";
 import { getCandyMachineFromUrl, readKeypairFile } from "./utils";
+import ICandyMachineProvider from "./providers/CandyMachineProvider";
 
 interface IRawTask {
   startDate: string;
   payerKeypairFile: string;
   hyperspaceUrl: string;
   maxMintAmount: number;
+}
+
+interface IRunMintTask<CandyMachine> {
+  task: ITask;
+  interval: number;
+  connection: Connection;
+  provider: ICandyMachineProvider<CandyMachine>;
 }
 
 export interface ITask {
@@ -45,7 +59,6 @@ export const watchTasks = async (
         maxMintAmount: 1,
       },
     ];
-
     fs.writeFileSync(file, JSON.stringify(defaultTasks, null, 2));
     console.log(`Tasks file created at ${file}! Please edit it and try again.`);
     process.exit(1);
@@ -80,6 +93,37 @@ export const watchTasks = async (
 
   fs.watch(file, update);
 };
+
+export async function runMintTask<T>({
+  connection,
+  provider,
+  interval,
+  task: { candyMachineAddress, maxMintAmount, payer },
+}: IRunMintTask<T>): Promise<string[]> {
+  return Promise.all(
+    Array(maxMintAmount)
+      .fill(0)
+      .map(async () => {
+        const mint = Keypair.generate();
+        const ix = await provider.createMintInstruction({
+          mint: mint.publicKey,
+          payer: payer.publicKey,
+          candyMachine: candyMachineAddress,
+        });
+
+        const tx = new Transaction().add(ix);
+        const txSig = await sendAndConfirmTransaction(connection, tx, [
+          payer,
+          mint,
+        ]);
+
+        // Wait interval
+        await new Promise((resolve) => setTimeout(resolve, interval));
+
+        return txSig;
+      })
+  );
+}
 
 export const formatTask = ({
   payer,

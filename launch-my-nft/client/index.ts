@@ -9,7 +9,7 @@ import { Metaplex } from "@metaplex-foundation/js";
 import BN from "bn.js";
 import { findTotalMintsAddress } from "./pda";
 
-interface MintV5Args {
+export interface MintV5Args {
   candyMachine: PublicKey;
   mint: PublicKey;
   payer: PublicKey;

@@ -4,10 +4,10 @@
   "license": "MIT",
   "main": "./bot/index.ts",
   "bin": {
-    "lmn-mint": "./dist/bot/index.js"
+    "lmn-mint": "./dist/bot/bin.js"
   },
   "scripts": {
-    "dev": "ts-node-dev --transpile-only --respawn --clear --ignore-watch node_modules bot/index.ts",
+    "dev": "ts-node-dev --transpile-only --respawn --clear --ignore-watch node_modules bot/bin.ts",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
     "local": "yarn global add $PWD && lmn-mint"
