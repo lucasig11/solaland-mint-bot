@@ -1,18 +1,12 @@
 import { Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
-import ICandyMachineProvider, { ICreateMintInstructionDTO } from "..";
-import { LaunchMyNftCmClient } from "../../../../client";
-import {
-  CandyMachine,
-  decodeCandyMachine,
-  getVersionedCandyMachine,
-} from "../../../../client/utils";
+import ICandyMachineProvider, { ICreateMintInstructionDTO } from "../..";
+import { LaunchMyNftCmClient } from "./client";
+import { getVersionedCandyMachine } from "./client/utils";
 
 // Launch my NFT fee wallet (should be the same for every mint/candy machine).
 const LMN_FEE_WALLET = "33nQCgievSd3jJLSWFBefH3BJRN7h6sAoS82VFFdJGF5";
 
-export default class LmnCandyMachineProvider
-  implements ICandyMachineProvider<CandyMachine>
-{
+export default class LmnCandyMachineProvider implements ICandyMachineProvider {
   private feeWallet = new PublicKey(LMN_FEE_WALLET);
   private client: ReturnType<typeof LaunchMyNftCmClient>;
 
@@ -47,16 +41,5 @@ export default class LmnCandyMachineProvider
       payer,
       wallet,
     });
-  }
-
-  public async fetchCandyMachine(
-    conn: Connection,
-    cm: PublicKey
-  ): Promise<CandyMachine | null> {
-    return getVersionedCandyMachine(conn, cm);
-  }
-
-  public decodeCandyMachine(data: Buffer): CandyMachine {
-    return decodeCandyMachine(data);
   }
 }
