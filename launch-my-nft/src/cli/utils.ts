@@ -1,9 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import { Keypair, PublicKey } from "@solana/web3.js";
-
-import { IConfig } from "../lib";
-import { IMintTask } from "../lib/tasks"
+import { IConfig, IMintTask } from "../lib";
 
 type RawMetaplexTask = {
   metaplex: {
@@ -23,6 +21,28 @@ type RawTask = {
   maxMintAmount: number;
 } & (RawMetaplexTask | RawLaunchMyNftTask);
 
+const createDefaultTaskFile = (file: string) => {
+  const defaultTasks: RawTask[] = [
+    {
+      startDate: "2021-08-01 18:30:00",
+      payerKeypairFile: "payer.json",
+      launchMyNft: {
+        hyperspaceUrl: "collection_hyperspace_url",
+      },
+      maxMintAmount: 1,
+    },
+    {
+      startDate: "2021-08-01 18:30:00",
+      payerKeypairFile: "payer.json",
+      metaplex: {
+        candyMachine: "candy_machine_address",
+      },
+      maxMintAmount: 1,
+    },
+  ];
+  fs.writeFileSync(file, JSON.stringify(defaultTasks, null, 2));
+};
+
 export const watchTaskFile = async (
   file: string,
   onChange: (tasks: IMintTask[]) => void
@@ -30,26 +50,7 @@ export const watchTaskFile = async (
   if (!fs.existsSync(file)) {
     console.log(`Tasks file "${file}" not found!`);
     console.log("Creating a new file with example values...");
-    const defaultTasks: RawTask[] = [
-      {
-        startDate: "2021-08-01 18:30:00",
-        payerKeypairFile: "payer.json",
-        launchMyNft: {
-          hyperspaceUrl: "collection_hyperspace_url",
-        },
-        maxMintAmount: 1,
-      },
-      {
-        startDate: "2021-08-01 18:30:00",
-        payerKeypairFile: "payer.json",
-        metaplex: {
-          candyMachine: "candy_machine_address",
-        },
-        maxMintAmount: 1,
-      },
-    ];
-
-    fs.writeFileSync(file, JSON.stringify(defaultTasks, null, 2));
+    createDefaultTaskFile(file);
     console.log(`Tasks file created at ${file}! Please edit it and try again.`);
     process.exit(1);
   }
@@ -74,7 +75,7 @@ export const watchTaskFile = async (
       ) as IMintTask[];
 
       const newTasks = parsed.filter(
-        (t) => !oldTasks.find((s) => JSON.stringify(s) === JSON.stringify(t))
+        (t) => !oldTasks.find((o) => JSON.stringify(o) === JSON.stringify(t))
       );
 
       oldTasks.push(...newTasks);

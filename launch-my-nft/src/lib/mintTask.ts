@@ -1,3 +1,4 @@
+import { Metaplex } from "@metaplex-foundation/js";
 import {
   Connection,
   Keypair,
@@ -22,6 +23,19 @@ interface IRunMintTask {
   interval: number;
   connection: Connection;
 }
+
+const isHolding = async (
+  connection: Connection,
+  user: PublicKey,
+  creatorAddress: PublicKey
+): Promise<boolean> => {
+  const nfts = await Metaplex.make(connection)
+    .nfts()
+    .findAllByOwner({ owner: user });
+  return nfts.some(({ creators }) =>
+    creators[0].address.equals(creatorAddress)
+  );
+};
 
 export async function runMintTask({
   connection,
@@ -56,7 +70,7 @@ export async function runMintTask({
   );
 }
 
-export const formatTask = ({
+export const formatMintTask = ({
   payer,
   startDate,
   candyMachineAddress,
@@ -67,4 +81,3 @@ export const formatTask = ({
     Payer: ${payer.publicKey}
     Start date: ${startDate}`;
 };
-

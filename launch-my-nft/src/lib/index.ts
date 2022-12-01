@@ -1,5 +1,5 @@
 import { Connection } from "@solana/web3.js";
-import { IMintTask, formatTask, runMintTask } from "./tasks";
+import { IMintTask, formatMintTask, runMintTask } from "./mintTask";
 import Scheduler from "./scheduler";
 
 interface IConfig {
@@ -13,7 +13,7 @@ async function start(
 ) {
   const connection = new Connection(rpcUrl);
   scheduler.run(async (task) => {
-    console.log(`Running task:\n  ${formatTask(task)}`);
+    console.log(`Running task:\n  ${formatMintTask(task)}`);
     await runMintTask({ connection, interval, task });
   });
 }
