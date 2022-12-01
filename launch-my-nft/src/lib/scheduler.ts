@@ -3,17 +3,19 @@ interface ISchedulerTask {
 }
 
 export default class Scheduler<T extends ISchedulerTask> {
-  private schedule: T[] = [];
-
-  constructor(private readonly interval: number) {}
+  private queue: T[] = [];
 
   public async run(callback: (task: T) => Promise<void>) {
     while (true) {
       const now = new Date();
       let task: T | undefined;
 
-      while ((task = this.schedule.shift())) {
-        if (task.startDate > now) continue;
+      while ((task = this.queue.shift())) {
+        if (task.startDate > now) {
+          this.queue.push(task);
+          break;
+        }
+
         try {
           await callback(task);
         } catch (e) {
@@ -21,11 +23,11 @@ export default class Scheduler<T extends ISchedulerTask> {
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, this.interval));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
   public add(...tasks: T[]) {
-    this.schedule.push(...tasks);
+    this.queue.push(...tasks);
   }
 }

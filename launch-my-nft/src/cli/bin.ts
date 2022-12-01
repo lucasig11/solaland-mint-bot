@@ -4,7 +4,7 @@ import { readConfigFile, watchTaskFile } from "./utils";
 
 async function main() {
   const config = readConfigFile("config.json");
-  const scheduler = new Scheduler<IMintTask>(config.interval);
+  const scheduler = new Scheduler<IMintTask>();
   await watchTaskFile("tasks.json", (newTasks) => scheduler.add(...newTasks));
   await start(config, scheduler);
 }
