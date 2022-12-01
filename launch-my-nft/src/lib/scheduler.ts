@@ -2,10 +2,19 @@ interface ISchedulerTask {
   startDate: Date;
 }
 
-export default class Scheduler<T extends ISchedulerTask> {
-  private queue: T[] = [];
+export type SchedulerTaskResult = {
+  status: "success" | "failure";
+  data: any;
+};
 
-  public async run(callback: (task: T) => Promise<void>) {
+export class Scheduler<T extends ISchedulerTask> {
+  public queue: T[] = [];
+
+  constructor(
+    private taskResultHandler?: (res: SchedulerTaskResult[]) => void
+  ) {}
+
+  public async run(callback: (task: T) => Promise<SchedulerTaskResult[]>) {
     while (true) {
       const now = new Date();
       let task: T | undefined;
@@ -16,18 +25,13 @@ export default class Scheduler<T extends ISchedulerTask> {
           break;
         }
 
-        try {
-          await callback(task);
-        } catch (e) {
-          console.error("Task failed:", e);
+        const res = await callback(task);
+        if (this.taskResultHandler) {
+          this.taskResultHandler(res);
         }
       }
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-  }
-
-  public add(...tasks: T[]) {
-    this.queue.push(...tasks);
   }
 }

@@ -41,32 +41,34 @@ export async function runMintTask({
   connection,
   interval,
   task: { candyMachineAddress, maxMintAmount, payer, provider },
-}: IRunMintTask): Promise<string[]> {
-  const providerInstance = resolve(provider, connection);
+}: IRunMintTask): Promise<IRunMintTaskResult[]> {
+  if (!isElegible(connection, payer.publicKey)) {
+    return [
+      {
+        status: "failure",
+        data: new Error(
+          `[WhitelistError] Wallet ${payer.publicKey.toString()} is not elegible to mint.`
+        ),
+      },
+    ];
+  }
+
+  const providerInstance = resolve(connection, provider);
   return Promise.all(
     Array(maxMintAmount)
       .fill(0)
-      .map(async () => {
-        const mint = Keypair.generate();
+      .reduce((results) => {
         return [
-          await providerInstance.createMintInstruction({
-            mint: mint.publicKey,
-            payer: payer.publicKey,
-            candyMachine: candyMachineAddress,
-          }),
-          mint,
-        ] as [TransactionInstruction, Keypair];
-      })
-      .map(async (p) => {
-        const [ix, mint] = await p;
-        const tx = new Transaction().add(ix);
-        const txSig = await sendAndConfirmTransaction(connection, tx, [
-          payer,
-          mint,
-        ]);
-        await new Promise((resolve) => setTimeout(resolve, interval));
-        return txSig;
-      })
+          ...results,
+          mint(
+            connection,
+            providerInstance,
+            payer,
+            candyMachineAddress,
+            interval
+          ),
+        ];
+      }, [])
   );
 }
 
