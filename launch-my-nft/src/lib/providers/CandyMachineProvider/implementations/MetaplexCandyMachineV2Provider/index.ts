@@ -1,6 +1,8 @@
 import { Metaplex } from "@metaplex-foundation/js";
 import { TransactionInstruction, Connection } from "@solana/web3.js";
-import ICandyMachineProvider, { ICreateMintInstructionDTO } from "../..";
+import ICandyMachineProvider, {
+  ICreateMintInstructionDTO,
+} from "../../models/ICandyMachineProvider";
 
 export default class MetaplexCandyMachineV2 implements ICandyMachineProvider {
   private metaplex: Metaplex;

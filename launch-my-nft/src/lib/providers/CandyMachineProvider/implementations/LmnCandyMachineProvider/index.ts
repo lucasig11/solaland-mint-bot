@@ -1,5 +1,7 @@
 import { Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
-import ICandyMachineProvider, { ICreateMintInstructionDTO } from "../..";
+import ICandyMachineProvider, {
+  ICreateMintInstructionDTO,
+} from "../../models/ICandyMachineProvider";
 import { LaunchMyNftCmClient } from "./client";
 import { getVersionedCandyMachine } from "./client/utils";
 

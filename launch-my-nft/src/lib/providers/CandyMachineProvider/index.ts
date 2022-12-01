@@ -1,31 +1,20 @@
-import { Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { Connection } from "@solana/web3.js";
 import LmnCandyMachineProvider from "./implementations/LmnCandyMachineProvider";
 import MetaplexCandyMachineV2Provider from "./implementations/MetaplexCandyMachineV2Provider";
+import ICandyMachineProvider from "./models/ICandyMachineProvider";
 
-export interface ICreateMintInstructionDTO {
-  candyMachine: PublicKey;
-  mint: PublicKey;
-  payer: PublicKey;
-}
+const providers: Record<string, any> = {
+  "launch-my-nft": LmnCandyMachineProvider,
+  metaplex: MetaplexCandyMachineV2Provider,
+};
 
 export function resolve(
-  provider: string,
-  connection: Connection
+  connection: Connection,
+  provider: string
 ): ICandyMachineProvider {
-  switch (provider) {
-    case "launch-my-nft":
-      return new LmnCandyMachineProvider(connection);
-    case "metaplex":
-      return new MetaplexCandyMachineV2Provider(connection);
-    default:
-      throw new Error(`Unknown provider: ${provider}`);
+  const Provider = providers[provider];
+  if (!Provider) {
+    throw new Error(`Provider ${provider} not found`);
   }
+  return new Provider(connection);
 }
-
-interface ICandyMachineProvider {
-  createMintInstruction: (
-    args: ICreateMintInstructionDTO
-  ) => Promise<TransactionInstruction>;
-}
-
-export default ICandyMachineProvider;

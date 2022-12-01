@@ -6,9 +6,10 @@ import {
   sendAndConfirmTransaction,
   Signer,
   Transaction,
-  TransactionInstruction,
 } from "@solana/web3.js";
 import { resolve } from "./providers/CandyMachineProvider";
+import whitelists from "../config/whitelist";
+import ICandyMachineProvider from "./providers/CandyMachineProvider/models/ICandyMachineProvider";
 
 export interface IMintTask {
   payer: Signer;
@@ -24,17 +25,65 @@ interface IRunMintTask {
   connection: Connection;
 }
 
-const isHolding = async (
+const isElegible = async (
   connection: Connection,
-  user: PublicKey,
-  creatorAddress: PublicKey
+  user: PublicKey
 ): Promise<boolean> => {
-  const nfts = await Metaplex.make(connection)
-    .nfts()
-    .findAllByOwner({ owner: user });
-  return nfts.some(({ creators }) =>
-    creators[0].address.equals(creatorAddress)
-  );
+  const mpl = new Metaplex(connection);
+  const nfts = await mpl.nfts().findAllByOwner({ owner: user });
+  return (
+    await Promise.all(
+      whitelists.map(async (whitelist) => {
+        if (whitelist.type === "collection") {
+          return nfts.some((nft) =>
+            nft.collection?.address.equals(whitelist.collection)
+          );
+        } else if (whitelist.type === "creator") {
+          return nfts.some(({ creators }) =>
+            creators[0].address.equals(whitelist.creator)
+          );
+        }
+        return false;
+      })
+    )
+  ).some((isElegible) => isElegible);
+};
+
+interface IRunMintTaskResult {
+  status: "success" | "failure";
+  data: any;
+}
+
+const mint = async (
+  connection: Connection,
+  provider: ICandyMachineProvider,
+  payer: Signer,
+  candyMachineAddress: PublicKey,
+  interval: number
+): Promise<IRunMintTaskResult> => {
+  const mint = Keypair.generate();
+  const ix = await provider.createMintInstruction({
+    mint: mint.publicKey,
+    payer: payer.publicKey,
+    candyMachine: candyMachineAddress,
+  });
+  const tx = new Transaction().add(ix);
+  try {
+    const txSig = await sendAndConfirmTransaction(connection, tx, [
+      payer,
+      mint,
+    ]);
+    await new Promise((resolve) => setTimeout(resolve, interval));
+    return {
+      status: "success",
+      data: txSig,
+    };
+  } catch (e) {
+    return {
+      status: "failure",
+      data: e,
+    };
+  }
 };
 
 export async function runMintTask({
