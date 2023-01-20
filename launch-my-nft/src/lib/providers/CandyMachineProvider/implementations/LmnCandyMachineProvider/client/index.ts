@@ -8,6 +8,9 @@ import { mintV5, mintV6 } from "./gen/instructions";
 import { Metaplex } from "@metaplex-foundation/js";
 import BN from "bn.js";
 import { findTotalMintsAddress } from "./pda";
+import { getVersionedCandyMachine } from "./utils";
+import { CandyMachineV2, CandyMachineV3 } from "./gen/accounts";
+import { CandyMachineDataV3 } from "./gen/types";
 
 export interface MintV5Args {
   candyMachine: PublicKey;
@@ -26,7 +29,7 @@ export const LaunchMyNftCmClient = (connection: Connection) => {
   const metaplex = new Metaplex(connection);
   const tokenMetadataProgram = metaplex.programs().getTokenMetadata().address;
 
-  const createMintV5Instruction = ({
+  const createMintV5Instruction = async ({
     candyMachine,
     mint,
     payer,
@@ -38,10 +41,16 @@ export const LaunchMyNftCmClient = (connection: Connection) => {
     const associated = getAssociatedTokenAddressSync(mint, payer);
     const totalMints = findTotalMintsAddress({ candyMachine, payer });
 
-    const expect = new BN([0x00, 0x87, 0x93, 0x03], "le");
+    const cm = await getVersionedCandyMachine(connection, candyMachine);
+    const data = cm?.data as CandyMachineDataV3;
+    const nowTs = Math.floor(Date.now() / 1000);
+    const price =
+      data.saleFazes.filter((f) => f.start.gtn(nowTs)).at(-1)?.price ||
+      new BN(0);
+    const proof = [[]];
 
     return mintV5(
-      { expect, proof: [] },
+      { expect: price, proof },
       {
         candyMachine,
         mint,
@@ -60,7 +69,7 @@ export const LaunchMyNftCmClient = (connection: Connection) => {
     );
   };
 
-  const createMintV6Instruction = ({
+  const createMintV6Instruction = async ({
     candyMachine,
     mint,
     payer,
@@ -72,10 +81,16 @@ export const LaunchMyNftCmClient = (connection: Connection) => {
     const associated = getAssociatedTokenAddressSync(mint, payer);
     const totalMints = findTotalMintsAddress({ candyMachine, payer });
 
-    const expect = new BN([0x00, 0x94, 0x35, 0x77], "le");
+    const cm = await getVersionedCandyMachine(connection, candyMachine);
+    const data = cm?.data as CandyMachineDataV3;
+    const nowTs = Math.floor(Date.now() / 1000);
+    const price =
+      data.saleFazes.filter((f) => f.start.gtn(nowTs)).at(0)?.price ||
+      new BN(0);
+    const proof = [[]];
 
     return mintV6(
-      { expect, proof: [] },
+      { expect: price, proof },
       {
         candyMachine,
         mint,
